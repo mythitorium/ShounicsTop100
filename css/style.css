@@ -28,6 +28,11 @@
     --min-double-wide-width: 500px;
 
     --font: Arial;
+
+    --pairing-border-thickness: 2px;
+    --sub-border-thickness: 1px;
+    --sub-highlight-color: var(--color-dark-bg);
+    --additional-z: -1;
 }
 
 html {
@@ -62,13 +67,65 @@ body {
 }
 
 .pairing {
-    width: 100px;
-    height: 50px;
-    background-color: white;
+    width: calc(100% - 30px);
+    height: 100%;
+    margin-left: 15px;
+    margin-right: 15px;
+
+    display: grid;
+    grid-auto-rows: 1fr;
+}
+
+.pairing > div {
+    width: 100%;
+    height: 100%;
+    background-color: #222d34;
+    border: 1px solid black; 
+}
+
+.pairing > div:first-child {
+    border-bottom: none;
+}
+
+.pairing:hover {
+    outline: var(--pairing-border-thickness) solid rgb(255, 255, 255); 
+}
+
+.pairing > div:hover {
+    background-color: var(--sub-highlight-color);
+    outline: var(--sub-border-thickness) solid white;
+    z-index: var(--additional-z);
+}
+
+.glass {
+    pointer-events: none;
+}
+
+.winning {
+    background-color: #9c9a1f;
+}
+
+#container {
+    display: grid;
+    grid-auto-rows: max-content;
+    row-gap: 30px;
+    width: max-content;
+    height: auto;
+}
+
+.header {
+    text-align: center;
+    width: 100%;
+    height: 70px;
+    font-size: 40px;
+}
+
+.containerEmployee {
+    display: grid;
+    align-content: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
 }
 
 
-* { 
-    outline: 1px solid lime;
-    outline-offset: -1px;
-}

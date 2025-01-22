@@ -245,8 +245,17 @@ function buildTree(payloads) {
     return new Tree(pairings);
 }
 
-function renderTree(tree) {
-    createGrid(11, [24, 12, 6, 3, 2, 1, 2, 4, 7, 13, 26]);
+function renderTree(columns, rowSpread, title) {
+    createGrid(columns, rowSpread, title);
+}
+
+class ColumnConfig {
+    rows;
+    runts;
+    constructor(rows, runts) {
+        this.rows = rows;
+        this.runts = runts;
+    }
 }
 
 function placeElement(pointer) {
@@ -265,15 +274,17 @@ function find(id) {
 }
 
 
-function createGrid(columns, rowSpread) {
+function createGrid(columns, rowSpread, title) {
     let highestSpreadValue = 0;
     for (i in rowSpread) {
-        if (rowSpread[i] > highestSpreadValue) {
-            highestSpreadValue = rowSpread[i];
+        if (rowSpread[i].rows > highestSpreadValue) {
+            highestSpreadValue = rowSpread[i].rows;
         }
     }
     let height = highestSpreadValue * 60;
     let width = columns * 150;
+
+    console.log(rowSpread);
 
     let mainBox = newEl('div');
     mainBox.className = createCssClass(`
@@ -286,24 +297,54 @@ function createGrid(columns, rowSpread) {
     for (let i = 0; i < columns; i++) {
         console.log("-");
         let groupBox = newEl('div');
+
+        var rows = rowSpread[i].rows;
+        var runts = rowSpread[i].runts;
+        var runtAddition = '';
+        if (runts > 0) {
+            runtAddition = `repeat(${rowSpread[i].runts}, 1fr 50px 1fr)`;
+        }
+
         groupBox.className = createCssClass(`
             display: grid;
-            grid-template-rows: repeat(${rowSpread[i]}, 1fr 50px 1fr);
+            grid-template-rows: repeat(${rows - runts}, 1fr 50px 1fr) ${runtAddition};
             width: 100%;
             height: 100%;
         `, 'subBox' + getANumber());
-        for (let j = 0; j < rowSpread[i]; j++) {
+        for (let j = 0; j < rowSpread[i].rows; j++) {
             console.log(j);
             groupBox.appendChild(newEl('div'));
+
+
             let pairingBox = newEl('div');
             pairingBox.classList.add('pairing');
+            
+            let topBox = newEl('div');
+            topBox.id = 'topBox';
+            let bottomBox = newEl('div');
+            bottomBox.id = 'bottomBox';
+            pairingBox.appendChild(topBox);
+            pairingBox.appendChild(bottomBox);
+
+
             groupBox.appendChild(pairingBox);
             groupBox.appendChild(newEl('div'));
         } 
         mainBox.appendChild(groupBox);
     }
 
-    find('viewportTarget').appendChild(mainBox);
+    let header = newEl('p');
+    header.className = 'header';
+    console.log(title);
+    header.innerHTML = title;
+
+    let subContainer = newEl('div');
+    subContainer.className = 'containerEmployee';
+    
+
+    find('container').appendChild(header);
+    subContainer.appendChild(mainBox);
+    find('container').appendChild(subContainer);
 }
 
 
@@ -318,31 +359,34 @@ function createCssClass(inner, className) {
 }
 
 
-function renderSelf(pairing, x, y, endOfBloodline, polarization) {
-    let parentAbove = (pairing.topInheritsFrom === null);
-    let parentBelow = (pairing.bottomInheritsFrom === null);
-
-    if (!parentAbove && !parentBelow) {
-        return;
-    }
-
-    if (parentAbove) {
-        recur(pairings[pairing.topInheritsFrom], x, y, false, polarization);
-    }
-    if (parentBelow) {
-        if (endOfBloodline) {
-            recur(pairings[pairing.bottomInheritsFrom], x, y, false, polarization * -1);
-        } else {
-            recur(pairings[pairing.bottomInheritsFrom], x, y, false, polarization);
-        }
-        
-    }
-}
-
 function windowOnLoadStuff() {
     seedIds();
     let tree = buildTree(seededIds);
-    renderTree(tree);
+    renderTree(13, [
+        new ColumnConfig(24, 0),
+        new ColumnConfig(12, 0),
+        new ColumnConfig(6,  0),
+        new ColumnConfig(3,  0),
+        new ColumnConfig(2,  1),
+        new ColumnConfig(1,  0),
+        new ColumnConfig(1,  0),
+        new ColumnConfig(1,  0),
+        new ColumnConfig(2,  0),
+        new ColumnConfig(4,  0),
+        new ColumnConfig(7,  1),
+        new ColumnConfig(13, 0),
+        new ColumnConfig(26, 0)
+    ], "Main Bracket");
+
+    renderTree(1, [
+        new ColumnConfig(1, 0),
+    ], "3rd & 4th Bracket");
+
+    renderTree(2, [
+        new ColumnConfig(2, 0),
+        new ColumnConfig(1, 0),
+    ], "5th Bracket");
+
 }
 
 window.onkeydown = (event) => {
@@ -354,6 +398,8 @@ window.onkeydown = (event) => {
             ctrlDown = true;
             break;
     }
+
+    alterResponsiveCssVars(shiftDown || ctrlDown);
 };
 
 window.onkeyup = (event) => {
@@ -365,6 +411,24 @@ window.onkeyup = (event) => {
             ctrlDown = false;
             break;
     }
+    alterResponsiveCssVars(shiftDown || ctrlDown);
 };
+
+function alterResponsiveCssVars(enable) {
+    console.log("yo");
+    if (enable) {
+        var r = document.querySelector(':root');
+        r.style.setProperty('--pairing-border-thickness', '0');
+        r.style.setProperty('--sub-border-thickness', '2px');
+        //r.style.setProperty('--sub-highlight-color', 'var(--color-bg)');
+        r.style.setProperty('--additional-z', '2');
+    } else {
+        var r = document.querySelector(':root');
+        r.style.setProperty('--pairing-border-thickness', '2px');
+        r.style.setProperty('--sub-border-thickness', '0');
+        //r.style.setProperty('--sub-highlight-color', 'var(--color-dark-bg)');
+        r.style.setProperty('--additional-z', 'none');
+    }
+}
 
 window.onload = windowOnLoadStuff();
