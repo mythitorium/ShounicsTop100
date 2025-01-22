@@ -711,9 +711,9 @@ function applyEmbedToParent(parent, url, name) {
 
 window.onload = windowOnLoadStuff();
 
-//window.onbeforeunload = function() {
-//    return "Data will be lost if you leave the page, are you sure?";
-//};
+window.onbeforeunload = function() {
+    return "Data will be lost if you leave the page, are you sure?";
+};
 
 function resizeEmbeds() {
     var rect = find('clipBox1').getBoundingClientRect();
