@@ -75,7 +75,6 @@ class Id {
     }
 
     static split(id) {
-        console.log(id);
         let split = id.split(',');
         return [Number(split[0].substring(1)), Number(split[1].substring(1)), Number(split[2].substring(1))];
     }
@@ -193,8 +192,6 @@ function seedIds() {
         seededIds.push(ids[i]);
         seededIds.push(ids[ids.length-i-1]);
     }
-    console.log(ids.length);
-    console.log(seededIds.length);
 }
 
 let runoffTreeExceptions = [[6, 1], [5, 1]]; 
@@ -239,9 +236,6 @@ function buildTree(payloads) {
         queue = nextQueue;
         if (endLineage) { queue = []; }
     }
-
-    console.log(pairings);
-
     return new Tree(pairings);
 }
 
@@ -275,6 +269,8 @@ function find(id) {
 
 
 function createGrid(columns, rowSpread, title) {
+    var counter = 0;
+
     let highestSpreadValue = 0;
     for (i in rowSpread) {
         if (rowSpread[i].rows > highestSpreadValue) {
@@ -283,8 +279,6 @@ function createGrid(columns, rowSpread, title) {
     }
     let height = highestSpreadValue * 60;
     let width = columns * 150;
-
-    console.log(rowSpread);
 
     let mainBox = newEl('div');
     mainBox.className = createCssClass(`
@@ -295,47 +289,33 @@ function createGrid(columns, rowSpread, title) {
     `, 'mainBox' + getANumber());
 
     for (let i = 0; i < columns; i++) {
-        console.log("-");
         let groupBox = newEl('div');
 
         var rows = rowSpread[i].rows;
         var runts = rowSpread[i].runts;
         var runtAddition = '';
         if (runts > 0) {
-            runtAddition = `repeat(${rowSpread[i].runts}, 1fr 50px 1fr)`;
+            runtAddition = `repeat(${rowSpread[i].runts}, 34px 50px 34px)`;
         }
 
         groupBox.className = createCssClass(`
             display: grid;
-            grid-template-rows: repeat(${rows - runts}, 1fr 50px 1fr) ${runtAddition};
+            grid-template-rows: ${runtAddition} repeat(${rows - runts}, 1fr 50px 1fr);
             width: 100%;
             height: 100%;
         `, 'subBox' + getANumber());
         for (let j = 0; j < rowSpread[i].rows; j++) {
-            console.log(j);
+            groupBox.appendChild(newEl('div'));
+            groupBox.appendChild(createPairingBox(2, false));
             groupBox.appendChild(newEl('div'));
 
-
-            let pairingBox = newEl('div');
-            pairingBox.classList.add('pairing');
-            
-            let topBox = newEl('div');
-            topBox.id = 'topBox';
-            let bottomBox = newEl('div');
-            bottomBox.id = 'bottomBox';
-            pairingBox.appendChild(topBox);
-            pairingBox.appendChild(bottomBox);
-
-
-            groupBox.appendChild(pairingBox);
-            groupBox.appendChild(newEl('div'));
+            counter += 1;
         } 
         mainBox.appendChild(groupBox);
     }
 
     let header = newEl('p');
     header.className = 'header';
-    console.log(title);
     header.innerHTML = title;
 
     let subContainer = newEl('div');
@@ -345,6 +325,45 @@ function createGrid(columns, rowSpread, title) {
     find('container').appendChild(header);
     subContainer.appendChild(mainBox);
     find('container').appendChild(subContainer);
+}
+
+
+
+var pairingBoxCounter = -1;
+
+function getPairingBoxNumber() {
+    pairingBoxCounter += 1;
+    return pairingBoxCounter;
+}
+
+
+function createPairingBox(numberOfCells, noInputs, customId,) {
+    let id = getPairingBoxNumber();
+
+    if (!(customId === undefined)) {
+        id = customId;
+    }
+
+    let pairingBox = newEl('div');
+    pairingBox.classList.add('pairing');
+
+    let ref = { "parent" : pairingBox, "cells" : {} }
+
+    for (let i = 0; i < numberOfCells; i ++) {
+        let cell = newEl('div');
+        cell.id = id + "-" + i;
+        cell.innerHTML = id;
+
+        if (!noInputs) {
+            cell.setAttribute('onclick', `voteAttempted(${id}, ${i}, ${numberOfCells - i - 1})`);
+        }
+
+        pairingBox.appendChild(cell);
+        ref.cells[i] = cell;
+    }
+
+    elementRef[id] = ref;
+    return pairingBox;
 }
 
 
@@ -359,6 +378,144 @@ function createCssClass(inner, className) {
 }
 
 
+
+var elementRef = {}
+
+
+var connections = {
+    0   : [[24, 0]],
+    1   : [[24, 1]],
+    2   : [[25, 0]],
+    3   : [[25, 1]],
+    4   : [[26, 0]],
+    5   : [[26, 1]],
+    6   : [[27, 0]],
+    7   : [[27, 1]],
+    8   : [[28, 0]],
+    9   : [[28, 1]],
+    10  : [[29, 0]],
+    11  : [[29, 1]],
+    12  : [[30, 0]],
+    13  : [[30, 1]],
+    14  : [[31, 0]],
+    15  : [[31, 1]],
+    16  : [[32, 0]],
+    17  : [[32, 1]],
+    18  : [[33, 0]],
+    19  : [[33, 1]],
+    20  : [[34, 0]],
+    21  : [[34, 1]],
+    22  : [[35, 0]],
+    23  : [[35, 1]],
+    24  : [[36, 0]],
+    25  : [[36, 1]],
+    26  : [[37, 0]],
+    27  : [[37, 1]],
+    28  : [[38, 0]],
+    29  : [[38, 1]],
+    30  : [[39, 0]],
+    31  : [[39, 1]],
+    32  : [[40, 0]],
+    33  : [[40, 1]],
+    34  : [[41, 0]],
+    35  : [[41, 1]],
+    36  : [[42, 0]],
+    37  : [[42, 1]],
+    38  : [[43, 0]],
+    39  : [[43, 1]],
+    40  : [[44, 0]],
+    41  : [[44, 1]],
+    42  : [[45, 0]],
+    43  : [[45, 0]],
+    44  : [[46, 1]],
+    45  : [[47, 0], [103, 0]],
+    46  : [[47, 1], [104, 0]],
+    47  : [[48, 0], [102, 0]],
+    48  : [[999, 0], [999, 1]],
+    49  : [[48, 1], [102, 1]],
+    50  : [[49, 0], [103, 1]],
+    51  : [[49, 1], [104, 1]],
+    52  : [[50, 0]],
+    53  : [[50, 1]],
+    54  : [[51, 0]],
+    55  : [[51, 1]],
+    56  : [[52, 0]],
+    57  : [[52, 1]],
+    58  : [[53, 0]],
+    59  : [[53, 1]],
+    60  : [[54, 0]],
+    61  : [[55, 0]],
+    62  : [[55, 1]],
+    63  : [[56, 0]],
+    64  : [[57, 0]],
+    65  : [[57, 1]],
+    66  : [[58, 0]],
+    67  : [[58, 1]],
+    68  : [[59, 0]],
+    69  : [[59, 1]],
+    70  : [[60, 0]],
+    71  : [[60, 1]],
+    72  : [[61, 0]],
+    73  : [[61, 1]],
+    74  : [[62, 0]],
+    75  : [[62, 1]],
+    76  : [[63, 0]],
+    77  : [[63, 1]],
+    78  : [[64, 0]],
+    79  : [[64, 1]],
+    80  : [[65, 0]],
+    81  : [[65, 1]],
+    82  : [[66, 0]],
+    83  : [[66, 1]],
+    84  : [[67, 0]],
+    85  : [[67, 1]],
+    86  : [[68, 0]],
+    87  : [[68, 1]],
+    88  : [[69, 0]],
+    89  : [[69, 1]],
+    90  : [[70, 0]],
+    91  : [[70, 1]],
+    92  : [[71, 0]],
+    93  : [[71, 1]],
+    94  : [[72, 0]],
+    95  : [[72, 1]],
+    96  : [[73, 0]],
+    97  : [[73, 1]],
+    98  : [[74, 0]],
+    99  : [[74, 1]],
+    100 : [[75, 0]],
+    101 : [[75, 1]],
+
+    102 : [[999, 2], [999, 3]],
+
+    103 : [[105, 0]],
+    104 : [[105, 1]],
+    105 : [[999, 3], [999, 4]],
+}
+
+
+function voteAttempted(id, cell, loserCell) {
+    console.log(`${id},${cell},${loserCell}`);
+    if (ctrlDown) {
+        let payload = elementRef[id].cells[cell].innerHTML;
+        let loserPayload = elementRef[id].cells[loserCell].innerHTML;
+        if (payload.length > 0) {
+            let dPairId = connections[id][0][0];
+            let dCellId = connections[id][0][1];
+    
+            elementRef[dPairId].cells[dCellId].innerHTML = payload;
+
+            if (connections[id].length > 1) {
+                let dLoserPairId = connections[id][1][0];
+                let dLoserCellId = connections[id][1][1];
+
+                elementRef[dLoserPairId].cells[dLoserCellId].innerHTML = loserPayload;
+            }
+        }
+    }
+}
+
+
 function windowOnLoadStuff() {
     seedIds();
     let tree = buildTree(seededIds);
@@ -367,7 +524,7 @@ function windowOnLoadStuff() {
         new ColumnConfig(12, 0),
         new ColumnConfig(6,  0),
         new ColumnConfig(3,  0),
-        new ColumnConfig(2,  1),
+        new ColumnConfig(2,  0),
         new ColumnConfig(1,  0),
         new ColumnConfig(1,  0),
         new ColumnConfig(1,  0),
@@ -380,12 +537,12 @@ function windowOnLoadStuff() {
 
     renderTree(1, [
         new ColumnConfig(1, 0),
-    ], "3rd & 4th Bracket");
+    ], "3rd & 4th Place Bracket");
 
     renderTree(2, [
         new ColumnConfig(2, 0),
         new ColumnConfig(1, 0),
-    ], "5th Bracket");
+    ], "5th Place Bracket");
 
 }
 
@@ -415,7 +572,6 @@ window.onkeyup = (event) => {
 };
 
 function alterResponsiveCssVars(enable) {
-    console.log("yo");
     if (enable) {
         var r = document.querySelector(':root');
         r.style.setProperty('--pairing-border-thickness', '0');
