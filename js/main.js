@@ -533,11 +533,10 @@ function voteAttempted(id, cell, loserCell) {
             elementRef[id].cells[cell].classList.add('winning');
             elementRef[id].cells[loserCell].classList.remove('winning');
         }
-    } else if (shiftDown) {
-
+    } else if (true) {
         let videoId1 = elementRef[id].cells[cell].getAttribute('data-videoId');
         let videoId2 = elementRef[id].cells[loserCell].getAttribute('data-videoId');
-        if (!(videoId1 === '') && !(videoId2 === '')) {
+        if (!(videoId1 === null) && !(videoId2 === null)) {
             doVideoEmbeds(videoId1, videoId2);
         }
     }
@@ -612,6 +611,8 @@ function windowOnLoadStuff() {
         }
     }
     //find('container').appendChild(svg);
+
+    clearEmbedOverlay();
 }
 
 window.onkeydown = (event) => {
