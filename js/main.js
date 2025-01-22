@@ -1,3 +1,9 @@
+//
+//
+// This is, hands down, the WORST fucking javascript I have EVER written
+// ~myth
+//
+
 class Clip {
     username;
     id;
@@ -186,6 +192,7 @@ var seededIds = [];
 
 var shiftDown = false;
 var ctrlDown = false;
+var videoMode = false;
 
 function seedIds() {
     for (let i = 0; i < (ids.length)/2; i++) {
@@ -503,24 +510,35 @@ var connections = {
 
 
 function voteAttempted(id, cell, loserCell) {
-    console.log(`${id},${cell},${loserCell}`);
+    console.log(id);
     if (ctrlDown) {
         let payload = elementRef[id].cells[cell].innerHTML;
+        let videoId = elementRef[id].cells[cell].getAttribute('data-videoId');
         let loserPayload = elementRef[id].cells[loserCell].innerHTML;
+        let loserVideoId = elementRef[id].cells[loserCell].getAttribute('data-videoId');
         if (!(payload === '') && !(loserPayload === '')) {
             let dPairId = connections[id][0][0];
             let dCellId = connections[id][0][1];
     
             elementRef[dPairId].cells[dCellId].innerHTML = payload;
+            elementRef[dPairId].cells[dCellId].setAttribute('data-videoId', videoId);
 
             if (connections[id].length > 1) {
                 let dLoserPairId = connections[id][1][0];
                 let dLoserCellId = connections[id][1][1];
 
                 elementRef[dLoserPairId].cells[dLoserCellId].innerHTML = loserPayload;
+                elementRef[dLoserPairId].cells[dLoserCellId].setAttribute('data-videoId', loserVideoId);
             }
             elementRef[id].cells[cell].classList.add('winning');
             elementRef[id].cells[loserCell].classList.remove('winning');
+        }
+    } else if (shiftDown) {
+
+        let videoId1 = elementRef[id].cells[cell].getAttribute('data-videoId');
+        let videoId2 = elementRef[id].cells[loserCell].getAttribute('data-videoId');
+        if (!(videoId1 === '') && !(videoId2 === '')) {
+            doVideoEmbeds(videoId1, videoId2);
         }
     }
 }
@@ -571,7 +589,9 @@ function windowOnLoadStuff() {
         starterId = starterPairs[i];
 
         elementRef[starterId].cells[0].innerHTML = seededIds[i*2].username;
+        elementRef[starterId].cells[0].setAttribute('data-videoId', seededIds[i*2].id)
         elementRef[starterId].cells[1].innerHTML = seededIds[(i*2)+1].username;
+        elementRef[starterId].cells[1].setAttribute('data-videoId', seededIds[(i*2)+1].id)
     }
 
     for (let i = 0; i < hidden.length; i++) {
@@ -596,23 +616,33 @@ function windowOnLoadStuff() {
 
 window.onkeydown = (event) => {
     switch (event.code) {
-        case 'ShiftLeft' || 'ShiftRight':
+        case 'KeyW':
             shiftDown = true;
             break;
-        case 'ControlLeft' || 'ControlRight':
+        case 'KeyC':
             ctrlDown = true;
             break;
     }
 
-    alterResponsiveCssVars(shiftDown || ctrlDown);
+    alterResponsiveCssVars(ctrlDown);
 };
+
+function clearEmbedOverlay() {
+    find('overlayFrame').classList.add('hidden');
+    if (!(find('clip1') === null)) {
+        find('clip1').remove();
+    }
+    if (!(find('clip2') === null)) {
+        find('clip2').remove();
+    }
+}
 
 window.onkeyup = (event) => {
     switch (event.code) {
-        case 'ShiftLeft' || 'ShiftRight':
+        case 'KeyW':
             shiftDown = false;
             break;
-        case 'ControlLeft' || 'ControlRight':
+        case 'KeyC':
             ctrlDown = false;
             break;
     }
@@ -654,8 +684,53 @@ function getCenterOfElement(element) {
     return [bounding.x - (bounding.width/2) - vpT.x + 130, bounding.y - (bounding.height/2) - vpT.y + 50]; 
 }
 
+
+function doVideoEmbeds(urlId1, urlId2) {    
+    if (!(find('clip1') === null)) {
+        find('clip1').remove();
+    }
+    if (!(find('clip2') === null)) {
+        find('clip2').remove();
+    }
+    find('overlayFrame').classList.remove('hidden');
+    applyEmbedToParent(find('clipBox1'),urlId1);
+    applyEmbedToParent(find('clipBox2'),urlId2);
+}
+
+function applyEmbedToParent(parent, url) {
+    var rect = parent.getBoundingClientRect();
+
+    const frame = newEl('iframe');
+    frame.id = "clip1";
+    //frame1.classList.add("parentRespectingVideoEmbed");
+    frame.width = rect['width'];
+    frame.height = rect['height'];
+    frame.src = "https://www.youtube.com/embed/" + url;
+    frame.setAttribute("allowfullscreen", "");
+    frame.setAttribute("allow", "autoplay; allowfullscreen");
+    parent.appendChild(frame);
+
+    frame.setAttribute('width', rect['width']);
+    frame.setAttribute('height', rect['height']);
+}
+
 window.onload = windowOnLoadStuff();
 
-window.onbeforeunload = function() {
-    return "Data will be lost if you leave the page, are you sure?";
-  };
+//window.onbeforeunload = function() {
+//    return "Data will be lost if you leave the page, are you sure?";
+//};
+
+function resizeEmbeds() {
+    var rect = find('clipBox1').getBoundingClientRect();
+    var frame1 = find('clip1');
+    if (!(frame1 === null)) {
+        frame1.width = rect['width'];
+        frame1.height = rect['height']; 
+    }
+    var frame2 = find('clip2');
+    if (!(frame2 === null)) {
+        frame2.width = rect['width'];
+        frame2.height = rect['height']; 
+    }
+}
+window.onresize = resizeEmbeds;

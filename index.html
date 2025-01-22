@@ -14,7 +14,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
-    <div class="viewport">
+    <div class="viewport" style="position: absolute;">
         <div id="viewportTarget">
             <div id="container">
                 <svg height="3000" width="300" xmlns="http://www.w3.org/2000/svg" id="svg">
@@ -23,9 +23,18 @@
         </div>
         <p id="helpBar">
             Hold LMB to pan<br>
-            Click a matchup to watch both<br>
-            Watch a single clip with SHIFT+LMB<br>
-            Select a winner with CTRL+LMB</p>
+            W + LMB to watch a matchup<br>
+            Select a winner with C + LMB<br>
+        </p>
+      </div>
+      <div id="overlayFrame">
+        <div class="e emptySpaceBros"></div>
+        <div id="panel">
+            <button onclick="clearEmbedOverlay()"><- Exit</button>
+            <div class="aspectRatioRespectingChad" id="clipBox1"></div>
+            <div class="aspectRatioRespectingChad" id="clipBox2"></div>
+        </div>
+        <div class="b emptySpaceBros"></div>
       </div>
     <script src="js/main.js"></script>
     <script src="js/pan.js"></script> 
