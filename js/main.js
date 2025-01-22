@@ -337,7 +337,7 @@ function getPairingBoxNumber() {
 }
 
 
-function createPairingBox(numberOfCells, noInputs, customId,) {
+function createPairingBox(numberOfCells, noInputs, customId) {
     let id = getPairingBoxNumber();
 
     if (!(customId === undefined)) {
@@ -426,8 +426,8 @@ var connections = {
     40  : [[44, 0]],
     41  : [[44, 1]],
     42  : [[45, 0]],
-    43  : [[45, 0]],
-    44  : [[46, 1]],
+    43  : [[45, 1]],
+    44  : [[46, 0]],
     45  : [[47, 0], [103, 0]],
     46  : [[47, 1], [104, 0]],
     47  : [[48, 0], [102, 0]],
@@ -490,7 +490,7 @@ var connections = {
 
     103 : [[105, 0]],
     104 : [[105, 1]],
-    105 : [[999, 3], [999, 4]],
+    105 : [[999, 4]],
 }
 
 
@@ -512,6 +512,9 @@ function voteAttempted(id, cell, loserCell) {
                 elementRef[dLoserPairId].cells[dLoserCellId].innerHTML = loserPayload;
             }
         }
+
+        elementRef[id].cells[cell].classList.add('winning');
+        elementRef[id].cells[loserCell].classList.remove('winning');
     }
 }
 
@@ -544,6 +547,17 @@ function windowOnLoadStuff() {
         new ColumnConfig(1, 0),
     ], "5th Place Bracket");
 
+    let header = newEl('p');
+    header.className = 'header';
+    header.innerHTML = 'Top 5 winners (they will show up here)';
+    header.style = 'font-size: 20px;';
+
+    find('container').appendChild(header);
+
+    let subContainer = newEl('div');
+    subContainer.className = 'containerEmployee';
+    subContainer.appendChild(createPairingBox(5, true, 999));
+    find('container').appendChild(subContainer);
 }
 
 window.onkeydown = (event) => {
