@@ -106,9 +106,17 @@ body {
     white-space: nowrap;
 }
 
+.pairing > p {
+    position: absolute;
+    color: red;
+    background-color: black;
+}
+
 .pairing > div:first-child {
     border-bottom: none;
 }
+
+
 
 .pairing:hover {
     outline: var(--pairing-border-thickness) solid rgb(255, 255, 255); 

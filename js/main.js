@@ -352,9 +352,15 @@ function createPairingBox(numberOfCells, noInputs, customId) {
     }
 
     let pairingBox = newEl('div');
+    
     pairingBox.classList.add('pairing');
-
     let ref = { "parent" : pairingBox, "cells" : {} }
+
+    //let debugP = newEl('p');
+    //debugP.innerHTML = '('+id+')'; 
+    //pairingBox.id = 'box' + id;
+
+
 
     for (let i = 0; i < numberOfCells; i ++) {
         let cell = newEl('div');
@@ -368,6 +374,8 @@ function createPairingBox(numberOfCells, noInputs, customId) {
         pairingBox.appendChild(cell);
         ref.cells[i] = cell;
     }
+
+    //pairingBox.appendChild(debugP);
 
     elementRef[id] = ref;
     return pairingBox;
@@ -396,6 +404,59 @@ var starterPairs = [
 var hidden = [
     46, 54, 56
 ];
+
+var connectionRound2Fix2 = {
+    0   :[[24, 0]],
+    83  :[[24, 1]],
+    84  :[[25, 0]],
+    16  :[[25, 1]],
+    99  :[[26, 0]],
+    15  :[[26, 1]],
+    100 :[[27, 0]],
+    8   :[[27, 1]],
+    23  :[[28, 0]],
+    92  :[[28, 1]],
+    76  :[[29, 0]],
+    91  :[[29, 1]],
+    7   :[[30, 0]],
+    80  :[[30, 1]],
+    3   :[[31, 0]],
+    87  :[[31, 1]],
+    19  :[[32, 0]],
+    96  :[[32, 1]],
+    12  :[[33, 0]],
+    11  :[[33, 1]],
+    20  :[[34, 0]],
+    95  :[[34, 1]],
+    78  :[[35, 0]],
+    88  :[[35, 1]],
+    4   :[[63, 0]],
+    85  :[[63, 1]],
+    82  :[[64, 0]],
+    1   :[[64, 1]],
+    17  :[[65, 0]],
+    98  :[[65, 1]],
+    14  :[[66, 0]],
+    101 :[[66, 1]],
+    9   :[[67, 0]],
+    22  :[[67, 1]],
+    93  :[[68, 0]],
+    77  :[[68, 1]],
+    90  :[[69, 0]],
+    6   :[[69, 1]],
+    97  :[[70, 0]],
+    81  :[[70, 1]],
+    86  :[[71, 0]],
+    18  :[[71, 1]],
+    2   :[[72, 0]],
+    13  :[[72, 1]],
+    10  :[[73, 0]],
+    21  :[[73, 1]],
+    94  :[[74, 0]],
+    79  :[[74, 1]],
+    89  :[[70, 0]],
+    5   :[[70, 1]]
+}
 
 var connections = {
     0   : [[24, 0]],
@@ -546,6 +607,14 @@ function voteAttempted(id, cell, loserCell) {
 function windowOnLoadStuff() {
     seedIds();
     let tree = buildTree(seededIds);
+
+    // fix seeding
+    let idsThatNeedFixing = Object.getOwnPropertyNames(connectionRound2Fix2);
+    for (let i = 0; i < idsThatNeedFixing.length; i++) {
+        let id = idsThatNeedFixing[i];
+        connections[id] = connectionRound2Fix2[id];
+    }
+
     renderTree(13, [
         new ColumnConfig(24, 0),
         new ColumnConfig(12, 0),
@@ -598,18 +667,18 @@ function windowOnLoadStuff() {
         elementRef[hidden[i]].parent.classList.add('invis');
     }
 
-    let svg = find('svg');
-    svg.setAttribute('width', 9000);
-    svg.setAttribute('height', 9000);
-    let connectionKeys = Object.getOwnPropertyNames(connections);
-    for (let i = 0; i < connectionKeys.length; i++) {
-        
-        let id1 = connectionKeys[i];
-        let id2 = connections[id1][0][0];
-        if (id2 < 999) {
-            svg.appendChild(generateLineBetween(id1, id2));
-        }
-    }
+    //let svg = find('svg');
+    //svg.setAttribute('width', 9000);
+    //svg.setAttribute('height', 9000);
+    //let connectionKeys = Object.getOwnPropertyNames(connections);
+    //for (let i = 0; i < connectionKeys.length; i++) {
+    //    
+    //    let id1 = connectionKeys[i];
+    //    let id2 = connections[id1][0][0];
+    //    if (id2 < 999) {
+    //        svg.appendChild(generateLineBetween(id1, id2));
+    //    }
+    //}
     //find('container').appendChild(svg);
 
     clearEmbedOverlay();
