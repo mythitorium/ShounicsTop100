@@ -534,8 +534,8 @@ function voteAttempted(id, cell, loserCell) {
             elementRef[id].cells[loserCell].classList.remove('winning');
         }
     } else if (true) {
-        let videoId1 = elementRef[id].cells[cell].getAttribute('data-videoId');
-        let videoId2 = elementRef[id].cells[loserCell].getAttribute('data-videoId');
+        let videoId1 = elementRef[id].cells[0].getAttribute('data-videoId');
+        let videoId2 = elementRef[id].cells[1].getAttribute('data-videoId');
         if (!(videoId1 === null) && !(videoId2 === null)) {
             doVideoEmbeds(videoId1, videoId2);
         }
@@ -687,22 +687,16 @@ function getCenterOfElement(element) {
 
 
 function doVideoEmbeds(urlId1, urlId2) {    
-    if (!(find('clip1') === null)) {
-        find('clip1').remove();
-    }
-    if (!(find('clip2') === null)) {
-        find('clip2').remove();
-    }
     find('overlayFrame').classList.remove('hidden');
-    applyEmbedToParent(find('clipBox1'),urlId1);
-    applyEmbedToParent(find('clipBox2'),urlId2);
+    applyEmbedToParent(find('clipBox1'),urlId1,'clip1');
+    applyEmbedToParent(find('clipBox2'),urlId2,'clip2');
 }
 
-function applyEmbedToParent(parent, url) {
+function applyEmbedToParent(parent, url, name) {
     var rect = parent.getBoundingClientRect();
 
     const frame = newEl('iframe');
-    frame.id = "clip1";
+    frame.id = name;
     //frame1.classList.add("parentRespectingVideoEmbed");
     frame.width = rect['width'];
     frame.height = rect['height'];
