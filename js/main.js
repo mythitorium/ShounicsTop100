@@ -9,12 +9,75 @@ class Clip {
     }
 }
 
-class NextPair {
-    default;
-    loser;
-    constructor(def, loser) {
-        this.default = def;
-        this.loser = loser;
+
+var globalCounter = 0;
+
+function getANumber() {
+    globalCounter += 1;
+    return globalCounter;
+}
+
+
+class Pairing {
+    topInheritsFrom;
+    bottomInheritsFrom;
+    inheritsTo;
+    carbonCopyTargets;
+
+    constructor(topInheritsFrom, bottomInheritsFrom, inheritsTo, carbonCopyTargets) {
+        this.topInheritsFrom = topInheritsFrom;
+        this.bottomInheritsFrom = bottomInheritsFrom;
+        this.inheritsTo = inheritsTo;
+        this.carbonCopyTargets = carbonCopyTargets;
+    }
+
+    isChildless() {
+        return this.inheritsTo === null;
+    }
+}
+
+
+class Tree {
+    pairings;
+    vSize;
+    constructor(pairings) {
+        let pairingKeys = Object.getOwnPropertyNames(pairings).sort();
+
+        let count = 0;
+        while (pairingKeys[count].substring(2,3) === '1') {
+            count++;
+        }
+
+        this.vSize = Math.ceil(count/2);
+        this.pairings = pairings;
+    }
+}
+
+
+class Pos {
+    x;
+    y;
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    move(offsetX, offsetY) {
+        this.x += offsetX;
+        this.y += offsetY;
+    }
+}
+
+
+class Id {
+    static join(tree, group, pair) {
+        return 't' + tree + ",g" + group + ",p" + pair;
+    }
+
+    static split(id) {
+        console.log(id);
+        let split = id.split(',');
+        return [Number(split[0].substring(1)), Number(split[1].substring(1)), Number(split[2].substring(1))];
     }
 }
 
@@ -122,76 +185,8 @@ var ids = [
 ];
 var seededIds = [];
 
-var nextBracketRef = {};
-var clipRef = {};
-
 var shiftDown = false;
 var ctrlDown = false;
-
-function generateTree() {
-    let baseTags = [];
-    for (let i = 1; i <= 50; i++) {
-        baseTags.push(new NextPair('1:1:' + i + ':1', null));
-        baseTags.push(new NextPair('1:1:' + i + ':2', null));
-    }
-
-    for (let i = 0; i < baseTags.length; i++) {
-        clipRef[baseTags[i].default] = seededIds[i];
-    }
-
-    let triggerEnd = false;
-    let totalIters = 0;
-    let currentSet = baseTags;
-    while (true) {
-        let nextSet = [];
-        let highestBracket = 0;
-        for (let i = 0; i < currentSet.length; i++) {
-            let tag = currentSet[i];
-            let split = tag.default.split(':');
-            
-            let tree = split[0];
-            let group = split[1];
-            let bracket = split[2];
-            let index = split[3];
-            
-            let newBracket = Math.ceil(bracket / 2);
-            let newIndex = Math.abs((bracket % 2) - 1) + 1;
-            let newGroup = Number(group) + 1;
-            
-            if (newBracket > highestBracket) {
-              highestBracket = Number(newBracket);
-            }
-
-            let newTag = tree + ":" + newGroup + ':' + newBracket + ':' + newIndex;
-            nextBracketRef[tag.default] = new NextPair(newTag, null);
-            nextSet.push(new NextPair(newTag, null));
-            
-            if ((group === '5' || group === '6') && tree === '1') {
-                let anotherTag = '';
-                if (group === '5') {
-                    anotherTag = '3:1:' + newBracket + ':' + newIndex;
-                } else {
-                    anotherTag = '2:1:' + newBracket + ':' + newIndex;
-                }
-                
-                nextBracketRef[tag.default].loser = anotherTag;
-                nextSet.push(new NextPair(anotherTag, null));
-            }
-
-
-            totalIters += 1;
-        }
-
-        currentSet = nextSet;
-        nextSet = [];
-
-        if (highestBracket === 1) {
-            break;
-        }
-    }
-
-  console.log(nextBracketRef);
-}
 
 function seedIds() {
     for (let i = 0; i < (ids.length)/2; i++) {
@@ -202,11 +197,152 @@ function seedIds() {
     console.log(seededIds.length);
 }
 
+let runoffTreeExceptions = [[6, 1], [5, 1]]; 
+
+function buildTree(payloads) {
+    let pairings = {};
+    let starter = [];
+    for (let i = 1; i <= (payloads.length/2); i++) {
+        pairings[Id.join(1,1,i)] = new Pairing(null, null, null, null);
+        starter.push(Id.join(1,1,i));
+    }
+
+    let queue = starter;
+    while (queue.length > 0) {
+        let nextQueue = [];
+        let endLineage = false;
+        // "If I'm on my own, end my bloodline!"
+        if (queue.length === 1) {
+            endLineage = true;
+        }
+        for (index in queue) {
+            let id = queue[index];
+            let [tree, group, pair] = Id.split(id);
+            let pairing = pairings[id];
+
+            let newGroup = group + 1;
+            let newPair = Math.ceil(pair/2);
+            let newId = Id.join(tree, newGroup, newPair);
+
+            pairing.inheritsTo = newId;
+
+            // if pairings already has this id, that means the current pairing is the bottom inheritor
+            if (!endLineage) {
+                if (Object.hasOwn(pairings, newId)) {
+                    pairings[newId].bottomInheritsFrom = id;
+                } else {
+                    pairings[newId] = new Pairing(id, null, null, null);
+                    nextQueue.push(newId);
+                }
+            }
+        }
+        queue = nextQueue;
+        if (endLineage) { queue = []; }
+    }
+
+    console.log(pairings);
+
+    return new Tree(pairings);
+}
+
+function renderTree(tree) {
+    createGrid(11, [24, 12, 6, 3, 2, 1, 2, 4, 7, 13, 26]);
+}
+
+function placeElement(pointer) {
+    let element = newEl('div');
+    element.style.transform = `${pointer.x}px ${pointer.y}px`;
+    element.classList.add('pairing');
+    find('viewportTarget').appendChild(element);
+}
+
+function newEl(by) {
+    return document.createElement(by);
+}
+
+function find(id) {
+    return document.getElementById(id);
+}
+
+
+function createGrid(columns, rowSpread) {
+    let highestSpreadValue = 0;
+    for (i in rowSpread) {
+        if (rowSpread[i] > highestSpreadValue) {
+            highestSpreadValue = rowSpread[i];
+        }
+    }
+    let height = highestSpreadValue * 60;
+    let width = columns * 150;
+
+    let mainBox = newEl('div');
+    mainBox.className = createCssClass(`
+        display: grid;
+        grid-template-columns: repeat(${columns},1fr);
+        width: ${width}px;
+        height: ${height}px;
+    `, 'mainBox' + getANumber());
+
+    for (let i = 0; i < columns; i++) {
+        console.log("-");
+        let groupBox = newEl('div');
+        groupBox.className = createCssClass(`
+            display: grid;
+            grid-template-rows: repeat(${rowSpread[i]}, 1fr 50px 1fr);
+            width: 100%;
+            height: 100%;
+        `, 'subBox' + getANumber());
+        for (let j = 0; j < rowSpread[i]; j++) {
+            console.log(j);
+            groupBox.appendChild(newEl('div'));
+            let pairingBox = newEl('div');
+            pairingBox.classList.add('pairing');
+            groupBox.appendChild(pairingBox);
+            groupBox.appendChild(newEl('div'));
+        } 
+        mainBox.appendChild(groupBox);
+    }
+
+    find('viewportTarget').appendChild(mainBox);
+}
+
+
+function createCssClass(inner, className) {
+    var style = document.createElement('style');
+    style.type = 'text/css';
+    style.innerHTML = `.${className} { ${inner} }`;
+    document.getElementsByTagName('head')[0].appendChild(style);
+
+    return className;
+    //document.getElementById('someElementId').className = 'cssClass'
+}
+
+
+function renderSelf(pairing, x, y, endOfBloodline, polarization) {
+    let parentAbove = (pairing.topInheritsFrom === null);
+    let parentBelow = (pairing.bottomInheritsFrom === null);
+
+    if (!parentAbove && !parentBelow) {
+        return;
+    }
+
+    if (parentAbove) {
+        recur(pairings[pairing.topInheritsFrom], x, y, false, polarization);
+    }
+    if (parentBelow) {
+        if (endOfBloodline) {
+            recur(pairings[pairing.bottomInheritsFrom], x, y, false, polarization * -1);
+        } else {
+            recur(pairings[pairing.bottomInheritsFrom], x, y, false, polarization);
+        }
+        
+    }
+}
+
 function windowOnLoadStuff() {
     seedIds();
-    generateTree();
-
-    console.log(clipRef);
+    let tree = buildTree(seededIds);
+    renderTree(tree);
 }
 
 window.onkeydown = (event) => {
