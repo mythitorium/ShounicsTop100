@@ -379,13 +379,16 @@ function createCssClass(inner, className) {
 
 
 
-var elementRef = {}
+var elementRef = {};
 
 
 var starterPairs = [
     0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101
-]
+];
 
+var hidden = [
+    46, 54, 56
+];
 
 var connections = {
     0   : [[24, 0]],
@@ -432,9 +435,9 @@ var connections = {
     41  : [[44, 1]],
     42  : [[45, 0]],
     43  : [[45, 1]],
-    44  : [[46, 0]],
+    44  : [[47, 1], [104, 0]], // over 46
     45  : [[47, 0], [103, 0]],
-    46  : [[47, 1], [104, 0]],
+    //46  : [[47, 1], [104, 0]],
     47  : [[48, 0], [102, 0]],
     48  : [[999, 0], [999, 1]],
     49  : [[48, 1], [102, 1]],
@@ -442,16 +445,16 @@ var connections = {
     51  : [[49, 1], [104, 1]],
     52  : [[50, 0]],
     53  : [[50, 1]],
-    54  : [[51, 0]],
+    //54  : [[51, 0]],
     55  : [[51, 1]],
-    56  : [[52, 0]],
+    //56  : [[52, 0]],
     57  : [[52, 1]],
     58  : [[53, 0]],
     59  : [[53, 1]],
-    60  : [[54, 0]],
+    60  : [[51, 0]], // over 54
     61  : [[55, 0]],
     62  : [[55, 1]],
-    63  : [[56, 0]],
+    63  : [[52, 0]], //over 56
     64  : [[57, 0]],
     65  : [[57, 1]],
     66  : [[58, 0]],
@@ -504,7 +507,7 @@ function voteAttempted(id, cell, loserCell) {
     if (ctrlDown) {
         let payload = elementRef[id].cells[cell].innerHTML;
         let loserPayload = elementRef[id].cells[loserCell].innerHTML;
-        if (payload.length > 0) {
+        if (!(payload === '') && !(loserPayload === '')) {
             let dPairId = connections[id][0][0];
             let dCellId = connections[id][0][1];
     
@@ -516,10 +519,9 @@ function voteAttempted(id, cell, loserCell) {
 
                 elementRef[dLoserPairId].cells[dLoserCellId].innerHTML = loserPayload;
             }
+            elementRef[id].cells[cell].classList.add('winning');
+            elementRef[id].cells[loserCell].classList.remove('winning');
         }
-
-        elementRef[id].cells[cell].classList.add('winning');
-        elementRef[id].cells[loserCell].classList.remove('winning');
     }
 }
 
@@ -571,6 +573,25 @@ function windowOnLoadStuff() {
         elementRef[starterId].cells[0].innerHTML = seededIds[i*2].username;
         elementRef[starterId].cells[1].innerHTML = seededIds[(i*2)+1].username;
     }
+
+    for (let i = 0; i < hidden.length; i++) {
+        console.log(elementRef);
+        elementRef[hidden[i]].parent.classList.add('invis');
+    }
+
+    let svg = find('svg');
+    svg.setAttribute('width', 9000);
+    svg.setAttribute('height', 9000);
+    let connectionKeys = Object.getOwnPropertyNames(connections);
+    for (let i = 0; i < connectionKeys.length; i++) {
+        
+        let id1 = connectionKeys[i];
+        let id2 = connections[id1][0][0];
+        if (id2 < 999) {
+            svg.appendChild(generateLineBetween(id1, id2));
+        }
+    }
+    //find('container').appendChild(svg);
 }
 
 window.onkeydown = (event) => {
@@ -614,4 +635,27 @@ function alterResponsiveCssVars(enable) {
     }
 }
 
+function generateLineBetween(id1, id2) {
+    let el1 = elementRef[id1].parent;
+    let [x1, y1] = getCenterOfElement(el1);
+    let el2 = elementRef[id2].parent;
+    let [x2, y2] = getCenterOfElement(el2);
+    let line = document.createElementNS("http://www.w3.org/2000/svg", 'line');
+    line.setAttribute('x1', x1);
+    line.setAttribute('y1', y1);
+    line.setAttribute('x2', x2);
+    line.setAttribute('y2', y2);
+    return line; 
+}
+
+function getCenterOfElement(element) {
+    let bounding = element.getBoundingClientRect();
+    let vpT = find('container').getBoundingClientRect();
+    return [bounding.x - (bounding.width/2) - vpT.x + 130, bounding.y - (bounding.height/2) - vpT.y + 50]; 
+}
+
 window.onload = windowOnLoadStuff();
+
+window.onbeforeunload = function() {
+    return "Data will be lost if you leave the page, are you sure?";
+  };
