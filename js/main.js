@@ -352,7 +352,7 @@ function createPairingBox(numberOfCells, noInputs, customId) {
     for (let i = 0; i < numberOfCells; i ++) {
         let cell = newEl('div');
         cell.id = id + "-" + i;
-        cell.innerHTML = id;
+        //cell.innerHTML = id;
 
         if (!noInputs) {
             cell.setAttribute('onclick', `voteAttempted(${id}, ${i}, ${numberOfCells - i - 1})`);
@@ -380,6 +380,11 @@ function createCssClass(inner, className) {
 
 
 var elementRef = {}
+
+
+var starterPairs = [
+    0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101
+]
 
 
 var connections = {
@@ -558,6 +563,14 @@ function windowOnLoadStuff() {
     subContainer.className = 'containerEmployee';
     subContainer.appendChild(createPairingBox(5, true, 999));
     find('container').appendChild(subContainer);
+
+    //populate
+    for (let i = 0; i < starterPairs.length; i++) {
+        starterId = starterPairs[i];
+
+        elementRef[starterId].cells[0].innerHTML = seededIds[i*2].username;
+        elementRef[starterId].cells[1].innerHTML = seededIds[(i*2)+1].username;
+    }
 }
 
 window.onkeydown = (event) => {
